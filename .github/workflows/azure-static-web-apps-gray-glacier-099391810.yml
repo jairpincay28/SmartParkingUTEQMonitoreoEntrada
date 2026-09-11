@@ -15,38 +15,27 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           submodules: true
           lfs: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: npm ci
-
-      # Paso clave: Se compila Vite aquí con las variables de entorno inyectadas
-      - name: Build project with Env Variables
-        run: npm run build
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          VITE_OCR_ENDPOINT: ${{ secrets.VITE_OCR_ENDPOINT }}
-
-      - name: Deploy to Azure Static Web Apps
+      - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GRAY_GLACIER_099391810 }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_BLUE_SAND_00FF92A10 }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
           action: "upload"
-          app_location: "/"
-          api_location: ""
-          output_location: "dist" # Carpeta estándar de salida en Vite
-          skip_app_build: true # Evita que Azure vuelva a compilar y borre las variables inyectadas
+          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
+          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
+          app_location: "/" # App source code path
+          api_location: "" # Api source code path - optional
+          output_location: "build" # Built app content directory - optional
+          ###### End of Repository/Build Configurations ######
+        env:
+          VITE_OCR_ENDPOINT: ${{ secrets.VITE_OCR_ENDPOINT }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE }}
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -59,4 +48,3 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GRAY_GLACIER_099391810 }}
           action: "close"
-          app_location: "" # Requerido para evitar errores de validación del esquema
